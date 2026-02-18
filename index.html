@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LAKSHYA | Private SwiftLink</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #050505; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #111; border: 2px solid #00d2ff; padding: 30px; border-radius: 20px; text-align: center; width: 350px; box-shadow: 0 0 20px rgba(0,210,255,0.2); }
+        h1 { color: #00d2ff; letter-spacing: 5px; margin: 0; }
+        input { width: 100%; padding: 12px; background: #000; border: 1px solid #333; color: #fff; border-radius: 8px; margin: 15px 0; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #00d2ff; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        #result { margin-top: 20px; display: none; padding: 15px; background: #1a1a1a; border-radius: 10px; border: 1px dashed #444; }
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        .small-btn { flex: 1; padding: 8px; font-size: 12px; background: transparent; color: #00d2ff; border: 1px solid #00d2ff; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="card" id="mainCard">
+    <h1>LAKSHYA</h1>
+    <p style="font-size: 10px; color: #555;">OWN DOMAIN SHORTENER</p>
+    
+    <input type="url" id="longUrl" placeholder="Paste Link Here...">
+    <button onclick="shorten()">SHORTEN</button>
+
+    <div id="result">
+        <p style="font-size: 11px; color: #888;">Aapka Personal Link:</p>
+        <div id="shortDisplay" style="color:#00d2ff; font-weight:bold; word-break:break-all; margin-bottom:10px;"></div>
+        <div class="btn-group">
+            <button class="small-btn" onclick="copy()">COPY</button>
+            <button class="small-btn" onclick="openL()">OPEN</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- REDIRECTION LOGIC (ASLI MAGIC) ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('l');
+    if (code) {
+        try {
+            // Jaise hi koi aapke naam ka link kholega, wo asli site pe pahunch jayega
+            window.location.href = atob(code);
+        } catch(e) {
+            alert("Invalid Link!");
+        }
+    }
+
+    // --- SHORTENING LOGIC ---
+    function shorten() {
+        const longUrl = document.getElementById('longUrl').value;
+        if(!longUrl.startsWith('http')) return alert("Please enter valid URL");
+
+        // Link ko encode karna (No Third Party)
+        const encoded = btoa(longUrl);
+        const myNameLink = window.location.origin + window.location.pathname + "?l=" + encoded;
+
+        document.getElementById('result').style.display = 'block';
+        document.getElementById('shortDisplay').innerText = myNameLink;
+    }
+
+    function copy() {
+        navigator.clipboard.writeText(document.getElementById('shortDisplay').innerText);
+        alert("Copied!");
+    }
+
+    function openL() {
+        window.open(document.getElementById('shortDisplay').innerText, '_blank');
+    }
+</script>
+
+</body>
+</html>

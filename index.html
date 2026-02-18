@@ -3,70 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LAKSHYA | Private SwiftLink</title>
+    <title>LAKSHYA | SwiftLink</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #050505; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: #111; border: 2px solid #00d2ff; padding: 30px; border-radius: 20px; text-align: center; width: 350px; box-shadow: 0 0 20px rgba(0,210,255,0.2); }
-        h1 { color: #00d2ff; letter-spacing: 5px; margin: 0; }
-        input { width: 100%; padding: 12px; background: #000; border: 1px solid #333; color: #fff; border-radius: 8px; margin: 15px 0; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #00d2ff; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        #result { margin-top: 20px; display: none; padding: 15px; background: #1a1a1a; border-radius: 10px; border: 1px dashed #444; }
-        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
-        .small-btn { flex: 1; padding: 8px; font-size: 12px; background: transparent; color: #00d2ff; border: 1px solid #00d2ff; border-radius: 5px; cursor: pointer; }
+        :root { --main: #00d2ff; --bg: #080808; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #111; border: 1px solid var(--main); padding: 30px; border-radius: 20px; text-align: center; width: 360px; box-shadow: 0 10px 40px rgba(0, 210, 255, 0.2); }
+        h1 { color: var(--main); letter-spacing: 4px; margin: 0; font-size: 35px; text-shadow: 0 0 10px rgba(0,210,255,0.5); }
+        .badge { background: var(--main); color: black; font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: bold; text-transform: uppercase; }
+        input { width: 100%; padding: 15px; background: #000; border: 1px solid #333; color: #fff; border-radius: 12px; margin: 20px 0 10px 0; box-sizing: border-box; outline: none; }
+        input:focus { border-color: var(--main); }
+        button#actionBtn { width: 100%; padding: 15px; background: var(--main); color: black; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        button#actionBtn:hover { transform: scale(1.02); box-shadow: 0 0 20px var(--main); }
+        #result { margin-top: 25px; display: none; padding: 20px; background: #1a1a1a; border-radius: 15px; border: 1px dashed var(--main); animation: slideUp 0.4s; }
+        @keyframes slideUp { from {opacity: 0; transform: translateY(10px);} to {opacity: 1; transform: translateY(0);} }
+        .short-url-text { color: var(--main); font-size: 20px; font-weight: bold; word-break: break-all; text-decoration: none; }
+        .btn-row { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-row button { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--main); background: transparent; color: var(--main); cursor: pointer; font-weight: bold; }
+        .btn-row button:hover { background: var(--main); color: black; }
     </style>
 </head>
 <body>
 
-<div class="card" id="mainCard">
+<div class="card">
+    <span class="badge">Official Tool</span>
     <h1>LAKSHYA</h1>
-    <p style="font-size: 10px; color: #555;">OWN DOMAIN SHORTENER</p>
+    <p style="color: #666; font-size: 12px; margin-top: 5px;">Powered by SwiftLink Engine</p>
     
-    <input type="url" id="longUrl" placeholder="Paste Link Here...">
-    <button onclick="shorten()">SHORTEN</button>
+    <input type="url" id="longUrl" placeholder="Bada link yahan paste karein...">
+    <button id="actionBtn" onclick="process()">SHORTEN LINK</button>
 
     <div id="result">
-        <p style="font-size: 11px; color: #888;">Aapka Personal Link:</p>
-        <div id="shortDisplay" style="color:#00d2ff; font-weight:bold; word-break:break-all; margin-bottom:10px;"></div>
-        <div class="btn-group">
-            <button class="small-btn" onclick="copy()">COPY</button>
-            <button class="small-btn" onclick="openL()">OPEN</button>
+        <p style="font-size: 11px; color: #888; margin-bottom: 8px;">Success! Aapka chota link:</p>
+        <a id="displayUrl" class="short-url-text" href="#" target="_blank"></a>
+        <div class="btn-row">
+            <button onclick="copyIt()">COPY</button>
+            <button onclick="openIt()">OPEN</button>
         </div>
     </div>
 </div>
 
 <script>
-    // --- REDIRECTION LOGIC (ASLI MAGIC) ---
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('l');
-    if (code) {
+    async function process() {
+        const input = document.getElementById('longUrl').value;
+        const btn = document.getElementById('actionBtn');
+        const resDiv = document.getElementById('result');
+
+        if(!input || !input.startsWith('http')) {
+            alert("Kripya sahi link dalein!");
+            return;
+        }
+
+        btn.innerText = "Generating...";
+        btn.disabled = true;
+
         try {
-            // Jaise hi koi aapke naam ka link kholega, wo asli site pe pahunch jayega
-            window.location.href = atob(code);
-        } catch(e) {
-            alert("Invalid Link!");
+            // TinyURL ka use karke asli "Shortening" ho rahi hai
+            const response = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(input)}`);
+            if (response.ok) {
+                const short = await response.text();
+                document.getElementById('displayUrl').innerText = short;
+                document.getElementById('displayUrl').href = short;
+                resDiv.style.display = 'block';
+            } else {
+                alert("Server busy hai!");
+            }
+        } catch (e) {
+            alert("Internet check karein!");
+        } finally {
+            btn.innerText = "SHORTEN LINK";
+            btn.disabled = false;
         }
     }
 
-    // --- SHORTENING LOGIC ---
-    function shorten() {
-        const longUrl = document.getElementById('longUrl').value;
-        if(!longUrl.startsWith('http')) return alert("Please enter valid URL");
-
-        // Link ko encode karna (No Third Party)
-        const encoded = btoa(longUrl);
-        const myNameLink = window.location.origin + window.location.pathname + "?l=" + encoded;
-
-        document.getElementById('result').style.display = 'block';
-        document.getElementById('shortDisplay').innerText = myNameLink;
+    function copyIt() {
+        const text = document.getElementById('displayUrl').innerText;
+        navigator.clipboard.writeText(text);
+        alert("LAKSHYA: Link Copied!");
     }
 
-    function copy() {
-        navigator.clipboard.writeText(document.getElementById('shortDisplay').innerText);
-        alert("Copied!");
-    }
-
-    function openL() {
-        window.open(document.getElementById('shortDisplay').innerText, '_blank');
+    function openIt() {
+        const url = document.getElementById('displayUrl').href;
+        window.open(url, '_blank');
     }
 </script>
 
